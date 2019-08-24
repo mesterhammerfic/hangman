@@ -21,7 +21,7 @@ def retrieveWord():
         print('searching...')
         res = requests.get('https://animals.fandom.com/wiki/Special:Random')
         res.raise_for_status()
-        animalSoup = bs4.BeautifulSoup(res.text, features='html5lib')
+        animalSoup = bs4.BeautifulSoup(res.text, features='lxml')
         #get the word
         wordElem = animalSoup.select('.page-header__title')
         word = wordElem[0].getText()
