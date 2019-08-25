@@ -5,7 +5,7 @@ Spyder Editor
 This is a temporary script file.
 """
 
-import requests, bs4
+import requests, bs4, string
 
 
 #Old Word selector, draws from a given list of words, requires the random and nltk module
@@ -36,20 +36,14 @@ def retrieveWord():
         if incorrectFormat == 1:
             continue
         #gets the clues
-#        descriptionElem = animalSoup.select('p')
-#        if len(descriptionElem) == 0: #makes sure there is a description paragraph
-##            print('*no description')
-#            continue
-#        else:
-#            listOfClues = descriptionElem[0].getText().split('. ')
-#            betterListOfClues = listOfClues[1:]
-#            if len(betterListOfClues)<3: #makes sure there are at least 3 clues
-##                print('*not enough clues')
-#                continue
-#            else:
-#                finalList = betterListOfClues
-        finalList = []
-        finalList.insert(0, word)
+        descriptionElem = animalSoup.select('p')
+        if len(descriptionElem) == 0: #makes sure there is a description paragraph
+#            print('*no description')
+            continue
+        else:
+            description = descriptionElem[0].getText()
+#            
+        finalList = [word, description]
         break
     
     return finalList
@@ -68,7 +62,10 @@ def letterFinder(word, display, letterGuess):
 def game(gameData):
     #score.format the word
     word = gameData[0].upper()
+    wordDescription = gameData[1]
     letterList = list(word)
+    unusedLetters = list(string.ascii_uppercase)
+    
     #score.set number of tries
     chances = 5
     
@@ -76,7 +73,7 @@ def game(gameData):
     displayWord = []
     for letter in letterList:
         displayWord.append("_")
-    displayWord = letterFinder(letterList, displayWord, ' ')
+    displayWord = letterFinder(letterList, displayWord, ' ') #automatically adds spaces
     #incorrect guesses
     displayChances = []
     
@@ -88,11 +85,12 @@ def game(gameData):
             displayWordString = displayWordString + i
         print(displayWordString)
         print("incorrect guesses: " + str(displayChances))
+        print("available guesses: " + str(unusedLetters))
         #input
         while True:
             guess = input("Guess a letter: ")
-            if type(guess) == str and len(guess) == 1 and guess.isalpha():
-                guess = guess.upper()
+            guess = guess.upper()
+            if type(guess) == str and len(guess) == 1 and guess.isalpha() and unusedLetters.count(guess) == 1:
                 break
         #score.adjustment
         if letterList.__contains__(guess):
@@ -100,13 +98,15 @@ def game(gameData):
         else:
             chances=chances-1
             displayChances.append(guess)
+        unusedLetters.remove(guess)
     #ending
     if chances == 0:
-        print("You lost")
-        print("the word was: "+word)
+        print("You lost\n\n----------------")
+        print("the word was: "+word+"\n\n"+wordDescription)
     else:
-        print("You won")
-        print(word)
+        print("You won\n\n----------------")
+        print(word+"\n\n"+wordDescription)
+        
     return
 
 newGame = retrieveWord()
